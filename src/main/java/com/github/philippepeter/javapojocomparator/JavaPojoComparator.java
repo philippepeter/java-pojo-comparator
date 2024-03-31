@@ -6,10 +6,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
 public class JavaPojoComparator<T> {
-
     private final Constructor<T> constructor;
 
     public JavaPojoComparator(Class<T> invalidPojoClass) {
+        constructor = checkEmptyConstructor(invalidPojoClass);
+    }
+
+    private Constructor<T> checkEmptyConstructor(Class<T> invalidPojoClass) {
+        final Constructor<T> constructor;
         try {
             constructor = invalidPojoClass.getConstructor();
             constructor.newInstance();
@@ -17,6 +21,7 @@ public class JavaPojoComparator<T> {
                  InvocationTargetException e) {
             throw new IllegalArgumentException("No empty constructor found", e);
         }
+        return constructor;
     }
 
     public T compare(T referenceValue, T toCompareValue) {
@@ -42,28 +47,31 @@ public class JavaPojoComparator<T> {
         Field[] declaredFields = notNullClass.getDeclaredFields();
 
         for (Field declaredField : declaredFields) {
-            Object subValue1 = getFieldValueOfObject(declaredField, value1);
-            Object subValue2 = getFieldValueOfObject(declaredField, value2);
-
-            Object subDiff = null;
-            if (subValue1 != null || subValue2 != null) {
-                if (isJavaBase(getNotNullClass(subValue1, subValue2))) {
-                    subDiff = subValue1 != subValue2 ? subValue2 : null;
-                } else {
-                    subDiff = computeDiff(subValue1, subValue2);
-                }
-            }
-
-            setFieldValueOfObject(declaredField, computedDiff, subDiff);
+            processField(value1, value2, declaredField, computedDiff);
 
         }
         return computedDiff;
     }
 
+    private static <U> void processField(U value1, U value2, Field declaredField, U computedDiff) {
+        Object subValue1 = getFieldValueOfObject(declaredField, value1);
+        Object subValue2 = getFieldValueOfObject(declaredField, value2);
+
+        Object subDiff = null;
+        if (subValue1 != null || subValue2 != null) {
+            if (isJavaBase(getNotNullClass(subValue1, subValue2))) {
+                subDiff = subValue1 != subValue2 ? subValue2 : null;
+            } else {
+                subDiff = computeDiff(subValue1, subValue2);
+            }
+        }
+
+        setFieldValueOfObject(declaredField, computedDiff, subDiff);
+    }
+
     private static <U> void setFieldValueOfObject(Field declaredField, U computedDiff, Object value) {
-        String setter = fetchSetterMethod(declaredField);
         try {
-            computedDiff.getClass().getMethod(setter, declaredField.getType()).invoke(computedDiff, value);
+            computedDiff.getClass().getMethod(fetchSetterMethod(declaredField), declaredField.getType()).invoke(computedDiff, value);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -73,10 +81,8 @@ public class JavaPojoComparator<T> {
         if (object == null) {
             return null;
         }
-
-        String getter = fetchGetterMethod(field);
         try {
-            return object.getClass().getMethod(getter).invoke(object);
+            return object.getClass().getMethod(fetchGetterMethod(field)).invoke(object);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
