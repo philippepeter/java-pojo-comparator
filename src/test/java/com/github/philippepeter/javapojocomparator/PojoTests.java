@@ -7,8 +7,8 @@ import lombok.Getter;
 
 @Getter
 public enum PojoTests {
-    TWO_EMPTY(new Pojo(), new Pojo(), new Pojo()),
-    NO_DIFF(createFullPojo(1, "1", 1.1, true), createFullPojo(1, "1", 1.1, true), new Pojo()),
+    TWO_EMPTY(new Pojo(), new Pojo(), null),
+    NO_DIFF(createFullPojo(1, "1", 1.1, true), createFullPojo(1, "1", 1.1, true), null),
     ONE_DIFF(createFullPojo(1, "1", 1.1, true), createFullPojo(2, "1", 1.1, true), createFullPojo(2, null, null, null));
 
     private final Pojo reference;
