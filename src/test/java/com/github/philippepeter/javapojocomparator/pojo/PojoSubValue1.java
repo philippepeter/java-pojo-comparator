@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class PojoSubValue1 {
-    Integer value1;
+    int value1;
     String value2;
 }

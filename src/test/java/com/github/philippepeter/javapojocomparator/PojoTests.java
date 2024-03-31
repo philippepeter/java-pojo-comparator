@@ -5,31 +5,38 @@ import com.github.philippepeter.javapojocomparator.pojo.PojoSubValue1;
 import com.github.philippepeter.javapojocomparator.pojo.PojoSubValue2;
 import lombok.Getter;
 
+import java.util.Collections;
+import java.util.List;
+
 @Getter
 public enum PojoTests {
     TWO_EMPTY(
             new Pojo(),
             new Pojo(),
-            null),
+            new PojoComparisons(Collections.emptyList())),
     NO_DIFF(
             createFullPojo(1, "1", 1.1, true),
             createFullPojo(1, "1", 1.1, true),
-            null),
-    ONE_DIFF(
+            new PojoComparisons(Collections.emptyList())),
+    ONE_DIFF_ON_INT(
             createFullPojo(1, "1", 1.1, true),
             createFullPojo(2, "1", 1.1, true),
-            createFullPojo(2, null, null, null)),
-    ONE_DIFF_WITH_NULL_FIRST(
-            createFullPojo(
-                    null, "1", 1.1, true),
-            createFullPojo(2, "1", 1.1, true),
-            createFullPojo(2, null, null, null));
+            new PojoComparisons(List.of(new PojoComparison("pojoTestSubValue1.value1", 2)))),
+    ONE_DIFF_ON_STRING(
+            createFullPojo(1, "1", 1.1, true),
+            createFullPojo(1, "2", 1.1, true),
+            new PojoComparisons(List.of(new PojoComparison("pojoTestSubValue1.value2", "2")))),
+    ONE_DIFF_ON_DOUBLE(
+            createFullPojo(1, "1", 1.1, true),
+            createFullPojo(1, "1", 2.2, true),
+            new PojoComparisons(List.of(new PojoComparison("pojoTestSubValue2.value1", 2.2))));
+
 
     private final Pojo reference;
     private final Pojo toCompare;
-    private final Pojo expected;
+    private final PojoComparisons expected;
 
-    PojoTests(Pojo reference, Pojo toCompare, Pojo expected) {
+    PojoTests(Pojo reference, Pojo toCompare, PojoComparisons expected) {
         this.reference = reference;
         this.toCompare = toCompare;
         this.expected = expected;
