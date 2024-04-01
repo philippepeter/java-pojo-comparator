@@ -29,7 +29,16 @@ public enum PojoTests {
     ONE_DIFF_ON_DOUBLE(
             createFullPojo(1, "1", 1.1, true),
             createFullPojo(1, "1", 2.2, true),
-            new PojoComparisons(List.of(new PojoComparison("pojoTestSubValue2.value1", 2.2))));
+            new PojoComparisons(List.of(new PojoComparison("pojoTestSubValue2.value1", 2.2)))),
+    ALL_DIFF(
+            createFullPojo(1, "1", 1.1, true),
+            createFullPojo(2, "2", 2.2, false),
+            new PojoComparisons(List.of(
+                    new PojoComparison("pojoTestSubValue1.value1", 2),
+                    new PojoComparison("pojoTestSubValue1.value2", "2"),
+                    new PojoComparison("pojoTestSubValue2.value1", 2.2),
+                    new PojoComparison("pojoTestSubValue2.value2", false)
+            )));
 
 
     private final Pojo reference;
